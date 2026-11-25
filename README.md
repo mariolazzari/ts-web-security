@@ -45,3 +45,23 @@ Missing browser security headers are a concrete example of A02: Security Misconf
 This header tells browsers to respect a response's declared Content-Type instead of guessing from its contents.
 
 This helps prevent security vulnerabilities related to MIME sniffing. For example, without nosniff, a browser might treat attacker-controlled content as executable code despite its declared type!
+
+## Authentication
+
+### Stateless vs. Stateful Authentication
+
+#### Stateless Authentication
+
+Every request carries a credential that the server can validate without looking up a server-side session record. Typically:
+
+- After successful login, the server issues a signed token to the client.
+- The client sends the signed token with each request.
+- The server accepts or rejects the request based on the token without loading a session record.
+
+#### Stateful Authentication
+
+The server remembers you. Typically:
+
+- After successful login, the server creates a session record and sends a secret session identifier to the client
+- The client sends the secret session identifier with future requests.
+- The server accepts or rejects the request after checking if the session identifier maps to a valid session record (usually in a database or in-memory store).
