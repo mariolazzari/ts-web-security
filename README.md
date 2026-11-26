@@ -65,3 +65,20 @@ The server remembers you. Typically:
 - After successful login, the server creates a session record and sends a secret session identifier to the client
 - The client sends the secret session identifier with future requests.
 - The server accepts or rejects the request after checking if the session identifier maps to a valid session record (usually in a database or in-memory store).
+
+### Sessions
+
+An authenticated session is created when a user successfully logs in. It's a record stored on the server that says "When a user presents this session ID, let them access this account while the session is valid."
+
+In a typical browser flow, the client stores and sends that ID in a cookie, and the server re-checks it against the session in the database on every request.
+
+#### Session ID
+
+A session ID is a reference to server-side data (often a row in a sessions table) that stores:
+
+- A unique ID for the session (id, which is secret and given to the client)
+- Which user authenticated (user_id)
+- When the session expires (expires_at)
+- Whether the session has been revoked (revoked_at, can be NULL if the session is still valid)
+
+### Cookies
