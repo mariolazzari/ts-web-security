@@ -82,3 +82,19 @@ A session ID is a reference to server-side data (often a row in a sessions table
 - Whether the session has been revoked (revoked_at, can be NULL if the session is still valid)
 
 ### Cookies
+
+From the server's point of view, cookies are convenient. From an attacker's point of view, session cookies are exploitable.
+
+- If an attacker steals a bearer session cookie and reuses it, the server (usually) can't tell those requests apart from the user's. Some common mistakes are:
+- If a session cookie is readable through document.cookie, injected JavaScript can steal it.
+- If a session cookie is sent over plain HTTP, an attacker who can observe the connection can capture it.
+- If a cookie has an unnecessarily broad domain or long expiration, an attacker has more opportunities to steal and reuse it.
+- If the browser attaches a cookie to a malicious cross-site request, cross-site request forgery (CSRF) is possible... which we'll talk about later.
+
+#### Cookie Security Flags
+
+Modern browsers give us tools to limit how cookies behave. The most important ones are:
+
+- HttpOnly (boolean): Prevents JavaScript from reading the cookie through document.cookie.
+- Secure (boolean): Sends the cookie only over HTTPS (and localhost, for development).
+- SameSite (Strict, Lax, None): Restricts when the browser sends the cookie with cross-site requests. Strict is the most restrictive. Lax also permits top-level cross-site navigations using safe methods, which many login flows need.
