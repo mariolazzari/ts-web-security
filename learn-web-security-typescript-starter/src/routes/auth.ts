@@ -14,7 +14,11 @@ import {
   clearSessionCookie,
   setSessionCookie,
 } from "../auth/sessionCookies.ts";
-import { createSession, getCurrentSession } from "../auth/sessions.ts";
+import {
+  createSession,
+  getCurrentSession,
+  revokeSession,
+} from "../auth/sessions.ts";
 import { verifyAndConsumeTotpCode } from "../auth/totp.ts";
 import {
   abandonTotpLoginChallenge,
@@ -139,7 +143,7 @@ export function createAuthRouter(deps: Dependencies): Router {
       return;
     }
 
-    if (!user || !(await verifyPassword(password, user.password_hash))) {
+    if (!user || !verifyPassword(password, user.password_hash)) {
       recordRecoveryAttempt(db, email, user?.id ?? null, false);
       logEvent("mfa_recovery_attempt", {
         email,
@@ -379,12 +383,13 @@ export function createAuthRouter(deps: Dependencies): Router {
   });
 
   router.post("/logout", (req, res) => {
+    const current = getCurrentSession(db, req.header("cookie"));
     const challengeToken = getTotpLoginChallengeToken(req.header("cookie"));
     abandonTotpLoginChallenge(db, req.header("cookie"));
     clearSessionCookie(res);
-    if (challengeToken) {
-      clearTotpLoginChallengeCookie(res);
-    }
+
+    if (challengeToken) clearTotpLoginChallengeCookie(res);
+    if (current) revokeSession(db, current.session.token);
     res.redirect("/");
   });
 

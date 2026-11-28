@@ -98,3 +98,21 @@ Modern browsers give us tools to limit how cookies behave. The most important on
 - HttpOnly (boolean): Prevents JavaScript from reading the cookie through document.cookie.
 - Secure (boolean): Sends the cookie only over HTTPS (and localhost, for development).
 - SameSite (Strict, Lax, None): Restricts when the browser sends the cookie with cross-site requests. Strict is the most restrictive. Lax also permits top-level cross-site navigations using safe methods, which many login flows need.
+
+### Session lifetime
+
+#### Session expiration
+
+Every session should have a server-enforced expiration, commonly stored in an expires_at column. Without a well-defined lifetime:
+
+- A stolen session may remain useful for far too long.
+- Old, still-valid sessions accumulate across devices.
+- Clearing one browser's cookie can leave copied session IDs valid on the server.
+
+The server must enforce the expiration. A client-side expiration timestamp helps the browser know when to discard its copy, but an attacker can always bypass browser behavior.
+
+### Revoking Sessions
+
+Expiration isn't enough. You and your users need to be able to revoke access when you suspect a session may be hijacked. Revoking a session means invalidating it immediately. There are also times when a server should automatically revoke sessions, like when a user logs out. It's not enough to just clear the browser cookie.
+
+This is where stateful sessions shine. A server can revoke a session by invalidating its record. A self-contained stateless token can't be individually revoked. That problem can be mitigated (but not eliminated) by short token lifetimes and refresh tokens that can be revoked.
